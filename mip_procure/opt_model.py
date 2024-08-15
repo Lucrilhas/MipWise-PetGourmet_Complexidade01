@@ -202,11 +202,11 @@ class OptModel:
         for i, t in itertools.product(I, T):
             mdl.addConstraint(plp.lpSum(w.get((i, t), 0) for i in I) <= ec)
             mdl.addConstraint(zs[i, t] * 1 <= tr[t])
-            #mdl.addConstraint((zs[i, t] * 350 >= w[i,t]))
-            #mdl.addConstraint(zs[i, t] * 1 <= w[i,t])
-            #mdl.addConstraint(w[i,t] <= zs[i, t] * 12000)
-            #mdl.addConstraint(w[i, t] >= 0)
-            #mdl.addConstraint(tr[t] <= zs[i,t] * 12000)
+            # mdl.addConstraint((zs[i, t] * 350 >= w[i,t]))
+            # mdl.addConstraint(zs[i, t] * 1 <= w[i,t])
+            # mdl.addConstraint(w[i,t] <= zs[i, t] * 12000)
+            # mdl.addConstraint(w[i, t] >= 0)
+            # mdl.addConstraint(tr[t] <= zs[i,t] * 12000)
         
 
     def add_complexity_8(self) -> None:
