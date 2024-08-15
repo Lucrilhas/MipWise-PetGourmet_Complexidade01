@@ -1,5 +1,6 @@
 import unittest
-from test_mip_procure import utils
+# from test_mip_procure import utils
+import utils
 import mip_procure
 
 

@@ -1,0 +1,32 @@
+Metadata-Version: 2.1
+Name: mip_procure
+Version: 0.1.1
+Summary: Solution for a procurement and inventory optimization problem
+Home-page: https://github.com/mipwise/mip_procure
+Author: Mip Wise
+Author-email: contact@mipwise.com
+Project-URL: Bug Tracker, https://github.com/mipwise/mip_procure/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ticdat>=0.2.22
+Requires-Dist: pandas>=1.4.3
+Requires-Dist: plotly>=5.13.1
+Requires-Dist: openpyxl>=3.0
+Requires-Dist: gurobipy>=10.0.2
+
+# Mip Procure
+
+## Repository guide
+- [docs](docs): Hosts documentation (in addition to readme files and docstrings)
+  of the project.
+- [mip_procure](mip_procure): Contains the Python package that solves the 
+  problem.
+  It contains scripts that define the input and the output data schemas, the 
+  solution engine, and other auxiliary modules.
+- [test_mip_procure](test_mip_procure): Hosts testing suits and testing data 
+  sets used for testing the solution throughout the development process.
+- `pyproject.toml` and `setup.cfg` are used to build the distribution files 
+  of the package (more information [here](https://github.com/mipwise/mip-go/blob/main/6_deploy/1_distribution_package/README.md)).

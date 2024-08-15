@@ -1,0 +1,5 @@
+ticdat>=0.2.22
+pandas>=1.4.3
+plotly>=5.13.1
+openpyxl>=3.0
+gurobipy>=10.0.2

@@ -128,6 +128,7 @@ class DatIn:
         self.z_keys = self.x_keys.copy()
         self.w_keys = [(i, t) for i in I for t in T]
         self.zs_keys = self.w_keys.copy()
+        self.tr_keys = [t for t in T]  #########################
         
     def print_opt_data(self) -> None:
         """

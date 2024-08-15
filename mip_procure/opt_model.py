@@ -55,7 +55,7 @@ class OptModel:
         """Add the decision variables."""
         mdl, dat_in = self.mdl, self.dat_in
         x_keys, y_keys, z_keys, ys_keys = dat_in.x_keys, dat_in.y_keys, dat_in.z_keys, dat_in.ys_keys
-        w_keys, zs_keys = dat_in.w_keys, dat_in.zs_keys
+        w_keys, zs_keys, tr_keys = dat_in.w_keys, dat_in.zs_keys, dat_in.tr_keys
 
         t1 = time.perf_counter()
         # create decision variables (add to mdl)
@@ -65,6 +65,7 @@ class OptModel:
         ys = plp.LpVariable.dicts('ys', ys_keys, lowBound=0, cat=plp.LpContinuous)  # S inventory
         w = plp.LpVariable.dicts('w', w_keys, lowBound=0, cat=plp.LpContinuous)  # Transfer qty
         zs = plp.LpVariable.dicts('zs', zs_keys, cat=plp.LpBinary)  # Transfer
+        tr = plp.LpVariable.dicts('tr', tr_keys, cat=plp.LpBinary)  # Transfer happened ##############################
 
         self.vars['x'] = x
         self.vars['y'] = y
@@ -72,6 +73,7 @@ class OptModel:
         self.vars['ys'] = ys
         self.vars['w'] = w
         self.vars['zs'] = zs
+        self.vars['tr'] = tr  ################################################
         t2 = time.perf_counter()
         print(f"ADDING DECISION VARS: {t2 - t1:.4f} s")
 
@@ -162,15 +164,50 @@ class OptModel:
         Build and set the objective function.
         """
         mdl, dat_in = self.mdl, self.dat_in
-        x, y, ys = self.vars['x'], self.vars['y'], self.vars['ys']
+        x, y, ys, tr, zs = self.vars['x'], self.vars['y'], self.vars['ys'], self.vars['tr'], self.vars['zs']
         pc, ci, cis = dat_in.pc, dat_in.ci, dat_in.cis
 
         # Objective function
         self.inventory_cost_s = plp.lpSum(cis[i] * ys[i, t] for i, t in ys)
         self.inventory_cost = plp.lpSum(ci[i] * y[i, t] for i, t in y)
         self.purchase_cost = plp.lpSum(pc[i, t] * x[i, t] for i, t in x)
-        self.total_cost = self.purchase_cost + self.inventory_cost + self.inventory_cost_s
+        self.transfer_cost = plp.lpSum(350 * tr[t] for t in tr)
+        #self.transfer_cost = plp.lpSum(350 * (1 - tr[t]) for t in tr)
+
+        self.total_cost = self.purchase_cost + self.inventory_cost + self.inventory_cost_s + self.transfer_cost
         mdl.setObjective(self.total_cost)
+
+        print('Total Transfer Cost', plp.value(self.transfer_cost))
+
+    def add_complexity_1(self) -> None:  ########################
+        """
+        Check if transfer happened
+        """
+
+        mdl, dat_in = self.mdl, self.dat_in
+        w, zs, tr = self.vars['w'], self.vars['zs'], self.vars['tr']
+        I, T, ec = self.dat_in.I, self.dat_in.T, self.dat_in.ec
+
+        # Objetivo:
+        # Fazer com que zs[i, t] = 1, logo (obrigatóriamente) w[i, t] >= 1 --> 1 <= w[i, t]
+        # zs[i, t] * 1 <= w[i, t]
+        # 1 * 1 <= w[i, t]
+
+        # Dessa forma, para zs[i, t] = 0, logo (obrigatóriamente) w[i, t] = 0
+        # w[i, t] <= zs[i, t] * 12000
+        # w[i, t] <= 0 * 12000
+        # w[i, t] <= 0
+
+        # Assim:
+        for i, t in itertools.product(I, T):
+            mdl.addConstraint(plp.lpSum(w.get((i, t), 0) for i in I) <= ec)
+            mdl.addConstraint(zs[i, t] * 1 <= tr[t])
+            #mdl.addConstraint((zs[i, t] * 350 >= w[i,t]))
+            #mdl.addConstraint(zs[i, t] * 1 <= w[i,t])
+            #mdl.addConstraint(w[i,t] <= zs[i, t] * 12000)
+            #mdl.addConstraint(w[i, t] >= 0)
+            #mdl.addConstraint(tr[t] <= zs[i,t] * 12000)
+        
 
     def add_complexity_8(self) -> None:
         """
@@ -217,6 +254,7 @@ class OptModel:
                 ('Total Procurement Cost', plp.value(self.purchase_cost)),
                 ('Total Inventory Holding Cost (supplier)', plp.value(self.inventory_cost_s)),
                 ('Total Inventory Holding Cost (warehouse)', plp.value(self.inventory_cost)),
+                ('Total Transfer Cost', plp.value(self.transfer_cost))  ####################################
             ]
 
             self.sol = {

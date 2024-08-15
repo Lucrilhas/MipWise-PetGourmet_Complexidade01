@@ -7,7 +7,7 @@ def solve(dat: input_schema.PanDat) -> output_schema.PanDat:
     dat_in = DatIn(dat, verbose=True)
     opt_model = OptModel(dat_in, model_name='Mip_Procure')
     opt_model.build_base_model()
-    # opt_model.add_complexity_1()
+    opt_model.add_complexity_1()
     # opt_model.add_complexity_2_proportional()
     # opt_model.add_complexity_2_fixed()
     # opt_model.add_complexity_3()
